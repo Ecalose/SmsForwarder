@@ -53,6 +53,6 @@ configurations.configureEach {
 }
 
 // 这里需要修改包名
-//aspectjx {
-//    include 'com.idormy.sms.forwarder'
-//}
+aspectjx {
+    include 'com.idormy.sms.forwarder'
+}

@@ -9,6 +9,8 @@ plugins {
     id 'kotlin-parcelize'
     id 'img-optimizer'
     id 'com.yanzhenjie.andserver'
+    //AspectJX: https://github.com/wurensen/gradle_plugin_android_aspectjx
+    id "io.github.wurensen.android-aspectjx" version "3.3.2"
 }
 
 def keyProps = new Properties()
@@ -161,6 +163,7 @@ android {
             exclude 'lib/x86_64/libgojni.so'
         }
         resources {
+            merge 'META-INF/mailcap'
             pickFirst 'META-INF/LICENSE.md'
             pickFirst 'META-INF/NOTICE.md'
             excludes += ['META-INF/DEPENDENCIES.txt', 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/DEPENDENCIES', 'META-INF/notice.txt', 'META-INF/license.txt', 'META-INF/dependencies.txt', 'META-INF/LGPL2.1']
@@ -206,21 +209,23 @@ android {
     }
     namespace 'com.idormy.sms.forwarder'
 
-    //编译前清理项目缓存
-    preBuild.dependsOn clean
-    //编译后清理垃圾文件
-    gradle.buildFinished { buildResult ->
-        if (buildResult.failure == null) {
-            println "Build succeeded, cleaning text files..."
-            //delete rootProject.buildDir
-            FileTree rootTree = fileTree(dir: rootDir)
-            rootTree.each { File file ->
-                if ((file.toString().contains("ajcore") || file.toString().contains("mapping") || file.toString().contains("seeds") || file.toString().contains("unused")) && file.toString().endsWith(".txt")) {
-                    delete file
+    if (isNeedPackage.toBoolean()) {
+        //编译前清理项目缓存
+        preBuild.dependsOn clean
+        //编译后清理垃圾文件
+        gradle.buildFinished { buildResult ->
+            if (buildResult.failure == null) {
+                println "Build succeeded, cleaning text files..."
+                //delete rootProject.buildDir
+                FileTree rootTree = fileTree(dir: rootDir)
+                rootTree.each { File file ->
+                    if ((file.toString().contains("ajcore") || file.toString().contains("mapping") || file.toString().contains("seeds") || file.toString().contains("unused")) && file.toString().endsWith(".txt")) {
+                        delete file
+                    }
                 }
+            } else {
+                println "Build failed, cleanTxt not executed."
             }
-        } else {
-            println "Build failed, cleanTxt not executed."
         }
     }
 }
